@@ -10,7 +10,23 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework import generics
 from .serializers import UserSerializer
 
-class ItemViewSet(viewsets.ModelViewSet):
+from django.contrib.auth import authenticate
+
+class LoginView(generics.GenericAPIView):
+    serializer_class = UserSerializer
+
+    def post(self, request):
+        username = request.data.get('username')
+        password = request.data.get('password')
+        user = authenticate(username=username, password=password)
+        if user is not None:
+            refresh = RefreshToken.for_user(user)
+            return Response({
+                'refresh': str(refresh),
+                'access': str(refresh.access_token),
+            })
+        return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
+class ItemViewSet(LoginView, viewsets.ModelViewSet):
     serializer_class = ItemSerializer
     permission_classes = [IsAuthenticated]
     queryset = Item.objects.all()
@@ -46,21 +62,7 @@ class ItemViewSet(viewsets.ModelViewSet):
         item.delete()
         return Response({'message': 'Item deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
 
-class RegisterView(generics.CreateAPIView):
+class RegisterView(LoginView, generics.CreateAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
-class LoginView(generics.GenericAPIView):
-    serializer_class = UserSerializer
-
-    def post(self, request):
-        username = request.data.get('username')
-        password = request.data.get('password')
-        user = authenticate(username=username, password=password)
-        if user is not None:
-            refresh = RefreshToken.for_user(user)
-            return Response({
-                'refresh': str(refresh),
-                'access': str(refresh.access_token),
-            })
-        return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
