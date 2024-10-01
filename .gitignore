@@ -1,4 +1,10 @@
 .venv
-/__pyc*
-debug.log
+*/*__pyc*
 db.sqlite3
+inventory/__pycache__/*
+debug.log
+inventory/__pycache__/settings.cpython-312.pyc
+inventory/__pycache__/settings.cpython-312.pyc
+inventory/__pycache__/urls.cpython-312.pyc
+inventory/__pycache__/settings.cpython-312.pyc
+inventory/deck/__pycache__/views.cpython-312.pyc

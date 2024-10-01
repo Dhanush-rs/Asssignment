@@ -173,4 +173,9 @@ LOGGING = {
         },
     },
 }
-LOGIN_URL = '/login/' 
+LOGIN_URL = '/login/'
+
+AUTHENTICATION_BACKENDS = (
+    'django.contrib.auth.backends.ModelBackend',
+    'django.contrib.auth.backends.RemoteUserBackend'
+)

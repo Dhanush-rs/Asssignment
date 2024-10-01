@@ -9,23 +9,21 @@ from django.contrib.auth.models import User
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework import generics
 from .serializers import UserSerializer
+from rest_framework.views import APIView
+from django.shortcuts import redirect
 
-from django.contrib.auth import authenticate
+from django.contrib.auth import authenticate, login
 
-class LoginView(generics.GenericAPIView):
-    serializer_class = UserSerializer
-
+class LoginView(APIView):
     def post(self, request):
         username = request.data.get('username')
         password = request.data.get('password')
+
         user = authenticate(username=username, password=password)
         if user is not None:
-            refresh = RefreshToken.for_user(user)
-            return Response({
-                'refresh': str(refresh),
-                'access': str(refresh.access_token),
-            })
-        return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
+            login(request, user)  # Log the user in
+            return redirect('/api')  # Redirect to home after successful login
+        return Response({'detail': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
 class ItemViewSet(LoginView, viewsets.ModelViewSet):
     serializer_class = ItemSerializer
     permission_classes = [IsAuthenticated]
@@ -65,4 +63,3 @@ class ItemViewSet(LoginView, viewsets.ModelViewSet):
 class RegisterView(LoginView, generics.CreateAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-
